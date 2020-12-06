@@ -31,14 +31,17 @@ namespace RGB_CMYK
         {
             this.bezzierPictureBox = new System.Windows.Forms.PictureBox();
             this.tableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
-            this.changePicButton = new System.Windows.Forms.Button();
-            this.changePicOpenFileDialog = new System.Windows.Forms.OpenFileDialog();
-            this.pictureBox = new System.Windows.Forms.PictureBox();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            this.changePicButton = new System.Windows.Forms.Button();
+            this.pictureBox = new System.Windows.Forms.PictureBox();
+            this.changePicOpenFileDialog = new System.Windows.Forms.OpenFileDialog();
+            this.flowLayoutPanel = new System.Windows.Forms.FlowLayoutPanel();
+            this.showSeparatedButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.bezzierPictureBox)).BeginInit();
             this.tableLayoutPanel.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).BeginInit();
             this.tableLayoutPanel1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).BeginInit();
+            this.flowLayoutPanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // bezzierPictureBox
@@ -67,9 +70,25 @@ namespace RGB_CMYK
             this.tableLayoutPanel.Size = new System.Drawing.Size(1228, 607);
             this.tableLayoutPanel.TabIndex = 1;
             // 
+            // tableLayoutPanel1
+            // 
+            this.tableLayoutPanel1.CellBorderStyle = System.Windows.Forms.TableLayoutPanelCellBorderStyle.Single;
+            this.tableLayoutPanel1.ColumnCount = 1;
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel1.Controls.Add(this.bezzierPictureBox, 0, 0);
+            this.tableLayoutPanel1.Controls.Add(this.flowLayoutPanel, 0, 1);
+            this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(4, 4);
+            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
+            this.tableLayoutPanel1.RowCount = 2;
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 400F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(494, 599);
+            this.tableLayoutPanel1.TabIndex = 3;
+            // 
             // changePicButton
             // 
-            this.changePicButton.Location = new System.Drawing.Point(4, 405);
+            this.changePicButton.Location = new System.Drawing.Point(3, 3);
             this.changePicButton.Name = "changePicButton";
             this.changePicButton.Size = new System.Drawing.Size(105, 23);
             this.changePicButton.TabIndex = 2;
@@ -85,27 +104,31 @@ namespace RGB_CMYK
             this.pictureBox.InitialImage = null;
             this.pictureBox.Location = new System.Drawing.Point(505, 4);
             this.pictureBox.Name = "pictureBox";
-            this.pictureBox.Size = new System.Drawing.Size(191, 223);
+            this.pictureBox.Size = new System.Drawing.Size(719, 599);
             this.pictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBox.TabIndex = 1;
             this.pictureBox.TabStop = false;
             this.pictureBox.WaitOnLoad = true;
             // 
-            // tableLayoutPanel1
+            // flowLayoutPanel
             // 
-            this.tableLayoutPanel1.CellBorderStyle = System.Windows.Forms.TableLayoutPanelCellBorderStyle.Single;
-            this.tableLayoutPanel1.ColumnCount = 1;
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel1.Controls.Add(this.bezzierPictureBox, 0, 0);
-            this.tableLayoutPanel1.Controls.Add(this.changePicButton, 0, 1);
-            this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel1.Location = new System.Drawing.Point(4, 4);
-            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.RowCount = 2;
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 400F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(494, 546);
-            this.tableLayoutPanel1.TabIndex = 3;
+            this.flowLayoutPanel.Controls.Add(this.changePicButton);
+            this.flowLayoutPanel.Controls.Add(this.showSeparatedButton);
+            this.flowLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.flowLayoutPanel.Location = new System.Drawing.Point(4, 405);
+            this.flowLayoutPanel.Name = "flowLayoutPanel";
+            this.flowLayoutPanel.Size = new System.Drawing.Size(486, 190);
+            this.flowLayoutPanel.TabIndex = 3;
+            // 
+            // showSeparatedButton
+            // 
+            this.showSeparatedButton.Location = new System.Drawing.Point(114, 3);
+            this.showSeparatedButton.Name = "showSeparatedButton";
+            this.showSeparatedButton.Size = new System.Drawing.Size(103, 23);
+            this.showSeparatedButton.TabIndex = 3;
+            this.showSeparatedButton.Text = "Show separated";
+            this.showSeparatedButton.UseVisualStyleBackColor = true;
+            this.showSeparatedButton.Click += new System.EventHandler(this.showSeparatedButton_Click);
             // 
             // RGB
             // 
@@ -114,11 +137,12 @@ namespace RGB_CMYK
             this.ClientSize = new System.Drawing.Size(1228, 607);
             this.Controls.Add(this.tableLayoutPanel);
             this.Name = "RGB";
-            this.Text = "Form1";
+            this.Text = "RGB -> CMYK";
             ((System.ComponentModel.ISupportInitialize)(this.bezzierPictureBox)).EndInit();
             this.tableLayoutPanel.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).EndInit();
             this.tableLayoutPanel1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).EndInit();
+            this.flowLayoutPanel.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -131,6 +155,8 @@ namespace RGB_CMYK
         private System.Windows.Forms.OpenFileDialog changePicOpenFileDialog;
         private System.Windows.Forms.PictureBox pictureBox;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
+        private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel;
+        private System.Windows.Forms.Button showSeparatedButton;
     }
 }
 

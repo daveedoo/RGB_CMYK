@@ -46,6 +46,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CMYK.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CMYK.Designer.cs">
+      <DependentUpon>CMYK.cs</DependentUpon>
+    </Compile>
     <Compile Include="RGB.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -54,6 +60,9 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="CMYK.resx">
+      <DependentUpon>CMYK.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="RGB.resx">
       <DependentUpon>RGB.cs</DependentUpon>
     </EmbeddedResource>
@@ -79,9 +88,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Photos\Mogielica.jpg" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
