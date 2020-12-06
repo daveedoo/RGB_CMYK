@@ -14,13 +14,14 @@ namespace RGB_CMYK
     {
         private Bitmap C, M, Y, K;
 
-        public CMYK(Bitmap c, Bitmap m, Bitmap y)
+        public CMYK((Bitmap c, Bitmap m, Bitmap y, Bitmap k) bmps)
         {
             InitializeComponent();
 
-            cPictureBox.Image = c;
-            mPictureBox.Image = m;
-            yPictureBox.Image = y;
+            cPictureBox.Image = bmps.c;
+            mPictureBox.Image = bmps.m;
+            yPictureBox.Image = bmps.y;
+            kPictureBox.Image = bmps.k;
         }
     }
 }

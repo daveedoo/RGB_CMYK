@@ -32,16 +32,20 @@ namespace RGB_CMYK
             this.bezzierPictureBox = new System.Windows.Forms.PictureBox();
             this.tableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            this.flowLayoutPanel = new System.Windows.Forms.FlowLayoutPanel();
             this.changePicButton = new System.Windows.Forms.Button();
+            this.showSeparatedButton = new System.Windows.Forms.Button();
             this.pictureBox = new System.Windows.Forms.PictureBox();
             this.changePicOpenFileDialog = new System.Windows.Forms.OpenFileDialog();
-            this.flowLayoutPanel = new System.Windows.Forms.FlowLayoutPanel();
-            this.showSeparatedButton = new System.Windows.Forms.Button();
+            this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
+            this.k0RadioButton = new System.Windows.Forms.RadioButton();
+            this.k100RadioButton = new System.Windows.Forms.RadioButton();
             ((System.ComponentModel.ISupportInitialize)(this.bezzierPictureBox)).BeginInit();
             this.tableLayoutPanel.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).BeginInit();
             this.flowLayoutPanel.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).BeginInit();
+            this.tableLayoutPanel2.SuspendLayout();
             this.SuspendLayout();
             // 
             // bezzierPictureBox
@@ -76,7 +80,7 @@ namespace RGB_CMYK
             this.tableLayoutPanel1.ColumnCount = 1;
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel1.Controls.Add(this.bezzierPictureBox, 0, 0);
-            this.tableLayoutPanel1.Controls.Add(this.flowLayoutPanel, 0, 1);
+            this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel2, 0, 1);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(4, 4);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
@@ -86,15 +90,36 @@ namespace RGB_CMYK
             this.tableLayoutPanel1.Size = new System.Drawing.Size(494, 599);
             this.tableLayoutPanel1.TabIndex = 3;
             // 
+            // flowLayoutPanel
+            // 
+            this.flowLayoutPanel.Controls.Add(this.k0RadioButton);
+            this.flowLayoutPanel.Controls.Add(this.k100RadioButton);
+            this.flowLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.flowLayoutPanel.Location = new System.Drawing.Point(3, 3);
+            this.flowLayoutPanel.Name = "flowLayoutPanel";
+            this.tableLayoutPanel2.SetRowSpan(this.flowLayoutPanel, 2);
+            this.flowLayoutPanel.Size = new System.Drawing.Size(109, 184);
+            this.flowLayoutPanel.TabIndex = 3;
+            // 
             // changePicButton
             // 
-            this.changePicButton.Location = new System.Drawing.Point(3, 3);
+            this.changePicButton.Location = new System.Drawing.Point(118, 3);
             this.changePicButton.Name = "changePicButton";
             this.changePicButton.Size = new System.Drawing.Size(105, 23);
             this.changePicButton.TabIndex = 2;
             this.changePicButton.Text = "Change Picture";
             this.changePicButton.UseVisualStyleBackColor = true;
             this.changePicButton.Click += new System.EventHandler(this.changePicButton_Click);
+            // 
+            // showSeparatedButton
+            // 
+            this.showSeparatedButton.Location = new System.Drawing.Point(118, 98);
+            this.showSeparatedButton.Name = "showSeparatedButton";
+            this.showSeparatedButton.Size = new System.Drawing.Size(103, 23);
+            this.showSeparatedButton.TabIndex = 3;
+            this.showSeparatedButton.Text = "Show separated";
+            this.showSeparatedButton.UseVisualStyleBackColor = true;
+            this.showSeparatedButton.Click += new System.EventHandler(this.showSeparatedButton_Click);
             // 
             // pictureBox
             // 
@@ -110,25 +135,44 @@ namespace RGB_CMYK
             this.pictureBox.TabStop = false;
             this.pictureBox.WaitOnLoad = true;
             // 
-            // flowLayoutPanel
+            // tableLayoutPanel2
             // 
-            this.flowLayoutPanel.Controls.Add(this.changePicButton);
-            this.flowLayoutPanel.Controls.Add(this.showSeparatedButton);
-            this.flowLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.flowLayoutPanel.Location = new System.Drawing.Point(4, 405);
-            this.flowLayoutPanel.Name = "flowLayoutPanel";
-            this.flowLayoutPanel.Size = new System.Drawing.Size(486, 190);
-            this.flowLayoutPanel.TabIndex = 3;
+            this.tableLayoutPanel2.ColumnCount = 2;
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 23.66255F));
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 76.33745F));
+            this.tableLayoutPanel2.Controls.Add(this.flowLayoutPanel, 0, 0);
+            this.tableLayoutPanel2.Controls.Add(this.changePicButton, 1, 0);
+            this.tableLayoutPanel2.Controls.Add(this.showSeparatedButton, 1, 1);
+            this.tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel2.Location = new System.Drawing.Point(4, 405);
+            this.tableLayoutPanel2.Name = "tableLayoutPanel2";
+            this.tableLayoutPanel2.RowCount = 2;
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(486, 190);
+            this.tableLayoutPanel2.TabIndex = 4;
             // 
-            // showSeparatedButton
+            // k0RadioButton
             // 
-            this.showSeparatedButton.Location = new System.Drawing.Point(114, 3);
-            this.showSeparatedButton.Name = "showSeparatedButton";
-            this.showSeparatedButton.Size = new System.Drawing.Size(103, 23);
-            this.showSeparatedButton.TabIndex = 3;
-            this.showSeparatedButton.Text = "Show separated";
-            this.showSeparatedButton.UseVisualStyleBackColor = true;
-            this.showSeparatedButton.Click += new System.EventHandler(this.showSeparatedButton_Click);
+            this.k0RadioButton.AutoSize = true;
+            this.k0RadioButton.Location = new System.Drawing.Point(3, 3);
+            this.k0RadioButton.Name = "k0RadioButton";
+            this.k0RadioButton.Size = new System.Drawing.Size(85, 17);
+            this.k0RadioButton.TabIndex = 0;
+            this.k0RadioButton.Text = "0% cofnięcia";
+            this.k0RadioButton.UseVisualStyleBackColor = true;
+            // 
+            // k100RadioButton
+            // 
+            this.k100RadioButton.AutoSize = true;
+            this.k100RadioButton.Checked = true;
+            this.k100RadioButton.Location = new System.Drawing.Point(3, 26);
+            this.k100RadioButton.Name = "k100RadioButton";
+            this.k100RadioButton.Size = new System.Drawing.Size(97, 17);
+            this.k100RadioButton.TabIndex = 1;
+            this.k100RadioButton.TabStop = true;
+            this.k100RadioButton.Text = "100% cofnięcia";
+            this.k100RadioButton.UseVisualStyleBackColor = true;
             // 
             // RGB
             // 
@@ -141,8 +185,10 @@ namespace RGB_CMYK
             ((System.ComponentModel.ISupportInitialize)(this.bezzierPictureBox)).EndInit();
             this.tableLayoutPanel.ResumeLayout(false);
             this.tableLayoutPanel1.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).EndInit();
             this.flowLayoutPanel.ResumeLayout(false);
+            this.flowLayoutPanel.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).EndInit();
+            this.tableLayoutPanel2.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -157,6 +203,9 @@ namespace RGB_CMYK
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel;
         private System.Windows.Forms.Button showSeparatedButton;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
+        private System.Windows.Forms.RadioButton k0RadioButton;
+        private System.Windows.Forms.RadioButton k100RadioButton;
     }
 }
 
