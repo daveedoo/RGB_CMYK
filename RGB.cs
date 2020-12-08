@@ -1,19 +1,24 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace RGB_CMYK
 {
     public partial class RGB : Form
     {
-        private Bitmap bmp;
+        private static int K100percent(int R, int G, int B) => 255 - Math.Max(R, Math.Max(G, B));
+        private static int K0percent(int R, int G, int B) => 0;
+
+        private Bitmap bmp; // obrazek
+        private Func<int, int, int, int> KFunc = K100percent;
+        private Bitmap Bezier; // bitmapa z wykresami krzywych Beziera
+        private BezierCurve curve;
+
+        private Point? MouseLeftDown;
+        private int MovedPointIndex = -1;
+
+
 
         public RGB()
         {
@@ -21,6 +26,73 @@ namespace RGB_CMYK
 
             changePicOpenFileDialog.InitialDirectory = Path.GetFullPath(Path.Combine(Application.StartupPath, @"..\..\Photos"));
             bmp = new Bitmap(Image.FromFile(Path.Combine(changePicOpenFileDialog.InitialDirectory, "Mogielica.jpg")));
+
+            bezierPictureBox.Image = Bezier = new Bitmap(bezierPictureBox.ClientRectangle.Width, bezierPictureBox.ClientRectangle.Height);
+            if (Bezier.Width != 512 || Bezier.Height != 512)
+                throw new Exception("bezzierPictureBox musi mieć wymiary 512x512");
+
+            //Graphics g = Graphics.FromImage(Bezzier);
+            //GraphicsContainer containerState = g.BeginContainer();
+            //// Flip the Y-Axis
+            //g.ScaleTransform(1.0F, -1.0F);
+            //// Translate the drawing area accordingly
+            //g.TranslateTransform(0.0F, -(float)Height);
+
+
+            // testing Bezzier()
+            Point P0 = new Point(0, 0);
+            Point P1 = new Point(64, 64);
+            Point P2 = new Point(192, 192);
+            Point P3 = new Point(255, 255);
+            curve = new BezierCurve(P0, P1, P2, P3);
+            bezierPictureBox.Image = curve.Draw();
+        }
+
+        private (Color, Color, Color, Color) getCMYK(Color color, Func<int, int, int, int> getK)
+        {
+            int r = color.R;
+            int g = color.G;
+            int b = color.B;
+
+            int k = getK(r, g, b);
+
+            Color C = Color.FromArgb(r + k, 255, 255);
+            Color M = Color.FromArgb(255, g + k, 255);
+            Color Y = Color.FromArgb(255, 255, b + k);
+            Color K = Color.FromArgb(
+                Convert.ToInt32(255 - k),
+                Convert.ToInt32(255 - k),
+                Convert.ToInt32(255 - k));
+            return (C, M, Y, K);
+        }
+
+        private (Bitmap, Bitmap, Bitmap, Bitmap) separate(Bitmap bitmap)
+        {
+            Bitmap C = new Bitmap(bitmap.Width, bitmap.Height);
+            Bitmap M = new Bitmap(bitmap.Width, bitmap.Height);
+            Bitmap Y = new Bitmap(bitmap.Width, bitmap.Height);
+            Bitmap K = new Bitmap(bitmap.Width, bitmap.Height);
+
+            for (int y = 0; y < bitmap.Height; y++)
+            {
+                for (int x = 0; x < bitmap.Width; x++)
+                {
+                    Color pixel = bitmap.GetPixel(x, y);
+                    (Color c, Color m, Color y, Color k) sep = getCMYK(pixel, KFunc);
+
+                    C.SetPixel(x, y, sep.c);
+                    M.SetPixel(x, y, sep.m);
+                    Y.SetPixel(x, y, sep.y);
+                    K.SetPixel(x, y, sep.k);
+                }
+            }
+            return (C, M, Y, K);
+        }
+
+        private void showSeparatedButton_Click(object sender, EventArgs e)
+        {
+            CMYK cmyk = new CMYK(separate(bmp));
+            cmyk.Show(this);
         }
 
         private void changePicButton_Click(object sender, EventArgs e)
@@ -32,84 +104,46 @@ namespace RGB_CMYK
             }
         }
 
-        private void showSeparatedButton_Click(object sender, EventArgs e)
+        private void k0RadioButton_CheckedChanged(object sender, EventArgs e)
         {
-            //Bitmap C = separate(bmp, separateC);
-            //Bitmap M = separate(bmp, separateM);
-            //Bitmap Y = separate(bmp, separateY);
-            //Bitmap K;
-
-
-            CMYK cmyk = new CMYK(separate(bmp));
-            cmyk.Show(this);
+            if (k0RadioButton.Checked)
+                KFunc = K0percent;
         }
 
-        private (Color, Color, Color, Color) getCMYK(Color color)
+        private void k100RadioButton_CheckedChanged(object sender, EventArgs e)
         {
-            double r = color.R / 255.0;
-            double g = color.G / 255.0;
-            double b = color.B / 255.0;
-
-            double k = 1.0 - Math.Max(r, Math.Max(g, b));
-            double c = 1 - r - k;
-            double m = 1 - g - k;
-            double y = 1 - b - k;
-
-            Color C = Color.FromArgb(Convert.ToInt32(255*(1.0 - c)), 255, 255);
-            Color M = Color.FromArgb(255, Convert.ToInt32(255*(1.0 - m)), 255);
-            Color Y = Color.FromArgb(255, 255, Convert.ToInt32(255*(1.0 - y)));
-            Color K = Color.FromArgb(
-                Convert.ToInt32(255 * (1.0 - k)),
-                Convert.ToInt32(255 * (1.0 - k)),
-                Convert.ToInt32(255 * (1.0 - k)));
-            return (C, M, Y, K);
+            if (k100RadioButton.Checked)
+                KFunc = K100percent;
         }
 
-        //private Color separateC(Color color)
-        //{
-        //    double p = 1.0 - color.R / 255.0;
-        //    return Color.FromArgb(
-        //                Convert.ToInt32(Color.Cyan.R * p),
-        //                Convert.ToInt32(Color.Cyan.G * p),
-        //                Convert.ToInt32(Color.Cyan.B * p));
-        //}
-        //private Color separateM(Color color, double K)
-        //{
-        //    double p = (1.0 - color.G / 255.0 - K) / (1.0 - K);
-        //    return Color.FromArgb(
-        //        Convert.ToInt32(Color.Magenta.R * p),
-        //        Convert.ToInt32(Color.Magenta.G * p),
-        //        Convert.ToInt32(Color.Magenta.B * p));
-        //}
-        //private Color separateY(Color color)
-        //{
-        //    double p = 1.0 - color.B / 255.0;
-        //    return Color.FromArgb(
-        //        Convert.ToInt32(Color.Yellow.R * p),
-        //        Convert.ToInt32(Color.Yellow.G * p),
-        //        Convert.ToInt32(Color.Yellow.B * p));
-        //}
-
-        private (Bitmap, Bitmap, Bitmap, Bitmap) separate(Bitmap bitmap)
+        private void bezierPictureBox_MouseDown(object sender, MouseEventArgs e)
         {
-            Bitmap C = new Bitmap(bitmap.Width, bitmap.Height);
-            Bitmap M = new Bitmap(bitmap.Width, bitmap.Height);
-            Bitmap Y = new Bitmap(bitmap.Width, bitmap.Height);
-            Bitmap K = new Bitmap(bitmap.Width, bitmap.Height);
-            for (int y = 0; y < bitmap.Height; y++)
+            if (e.Button == MouseButtons.Left)
             {
-                for (int x = 0; x < bitmap.Width; x++)
-                {
-                    Color pixel = bitmap.GetPixel(x, y);
-                    (Color c, Color m, Color y, Color k) sep = getCMYK(pixel);
-
-                    C.SetPixel(x, y, sep.c);
-                    M.SetPixel(x, y, sep.m);
-                    Y.SetPixel(x, y, sep.y);
-                    K.SetPixel(x, y, sep.k);
-                }
+                MovedPointIndex = curve.IsCloseToPoint(e.Location);
+                if (MovedPointIndex != -1)
+                    MouseLeftDown = e.Location;
             }
-            return (C, M, Y, K);
+        }
+
+        private void bezierPictureBox_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left && MouseLeftDown.HasValue)
+            {
+                bezierPictureBox.Image = curve.MovePoint(MovedPointIndex,
+                    e.X - MouseLeftDown.Value.X,
+                    e.Y - MouseLeftDown.Value.Y);
+                MouseLeftDown = e.Location;
+            }
+        }
+
+        private void bezierPictureBox_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                MouseLeftDown = null;
+                MovedPointIndex = -1;
+            }
         }
     }
 }
