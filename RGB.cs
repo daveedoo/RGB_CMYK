@@ -12,12 +12,11 @@ namespace RGB_CMYK
 
         private Bitmap bmp; // obrazek
         private Func<int, int, int, int> KFunc = K100percent;
-        private Bitmap Bezier; // bitmapa z wykresami krzywych Beziera
-        private BezierCurve curve;
 
         private Point? MouseLeftDown;
-        private int MovedPointIndex = -1;
+        private (int CurveIndex, int PointIndex) MovedPoint = (-1, -1);
 
+        private Bezier curves;
 
 
         public RGB()
@@ -27,27 +26,18 @@ namespace RGB_CMYK
             changePicOpenFileDialog.InitialDirectory = Path.GetFullPath(Path.Combine(Application.StartupPath, @"..\..\Photos"));
             bmp = new Bitmap(Image.FromFile(Path.Combine(changePicOpenFileDialog.InitialDirectory, "Mogielica.jpg")));
 
-            bezierPictureBox.Image = Bezier = new Bitmap(bezierPictureBox.ClientRectangle.Width, bezierPictureBox.ClientRectangle.Height);
-            if (Bezier.Width != 512 || Bezier.Height != 512)
-                throw new Exception("bezzierPictureBox musi mieć wymiary 512x512");
+            // inicjalizacja krzywych beziera
+            curves = new Bezier();
 
-            //Graphics g = Graphics.FromImage(Bezzier);
-            //GraphicsContainer containerState = g.BeginContainer();
-            //// Flip the Y-Axis
-            //g.ScaleTransform(1.0F, -1.0F);
-            //// Translate the drawing area accordingly
-            //g.TranslateTransform(0.0F, -(float)Height);
-
-
-            // testing Bezzier()
-            Point P0 = new Point(0, 0);
-            Point P1 = new Point(64, 64);
-            Point P2 = new Point(192, 192);
-            Point P3 = new Point(255, 255);
-            curve = new BezierCurve(P0, P1, P2, P3);
-            bezierPictureBox.Image = curve.Draw();
+            bezierPictureBox.Image = curves.bezierBitmap;
         }
 
+        /// <summary>
+        /// Rozdziela kolor na 4, aplikując również "krzywe szarości" Beziera (zapisane w polach cCurve, ..., kCurve)
+        /// </summary>
+        /// <param name="color">Kolor, który chcemy rozseparować na CMYK</param>
+        /// <param name="getK">Funkcja obliczająca wartość K na podstawie R, G, B koloru</param>
+        /// <returns>Kolory reprezentujące składowe cmyk</returns>
         private (Color, Color, Color, Color) getCMYK(Color color, Func<int, int, int, int> getK)
         {
             int r = color.R;
@@ -57,16 +47,31 @@ namespace RGB_CMYK
             int k = getK(r, g, b);
 
             Color C = Color.FromArgb(r + k, 255, 255);
+            C = Color.FromArgb(
+                255 - curves.Curves[0].Values[255 - C.R],
+                C.G,
+                C.B);
             Color M = Color.FromArgb(255, g + k, 255);
+            M = Color.FromArgb(
+                M.R,
+                255 - curves.Curves[1].Values[255 - M.G],
+                M.B);
             Color Y = Color.FromArgb(255, 255, b + k);
-            Color K = Color.FromArgb(
-                Convert.ToInt32(255 - k),
-                Convert.ToInt32(255 - k),
-                Convert.ToInt32(255 - k));
+            Y = Color.FromArgb(
+                Y.R,
+                Y.G,
+                255 - curves.Curves[2].Values[255 - Y.B]);
+
+            Color K = Color.FromArgb(255 - k, 255 - k, 255 - k);
+            K = Color.FromArgb(
+                curves.Curves[3].Values[K.R],
+                curves.Curves[3].Values[K.G],
+                curves.Curves[3].Values[K.B]);
+
             return (C, M, Y, K);
         }
 
-        private (Bitmap, Bitmap, Bitmap, Bitmap) separate(Bitmap bitmap)
+        private (Bitmap, Bitmap, Bitmap, Bitmap) separateAndAddCurves(Bitmap bitmap)
         {
             Bitmap C = new Bitmap(bitmap.Width, bitmap.Height);
             Bitmap M = new Bitmap(bitmap.Width, bitmap.Height);
@@ -91,7 +96,7 @@ namespace RGB_CMYK
 
         private void showSeparatedButton_Click(object sender, EventArgs e)
         {
-            CMYK cmyk = new CMYK(separate(bmp));
+            CMYK cmyk = new CMYK(separateAndAddCurves(bmp));
             cmyk.Show(this);
         }
 
@@ -120,8 +125,8 @@ namespace RGB_CMYK
         {
             if (e.Button == MouseButtons.Left)
             {
-                MovedPointIndex = curve.IsCloseToPoint(e.Location);
-                if (MovedPointIndex != -1)
+                MovedPoint = curves.IsCloseToPoint(e.Location);
+                if (MovedPoint != (-1, -1))
                     MouseLeftDown = e.Location;
             }
         }
@@ -130,9 +135,10 @@ namespace RGB_CMYK
         {
             if (e.Button == MouseButtons.Left && MouseLeftDown.HasValue)
             {
-                bezierPictureBox.Image = curve.MovePoint(MovedPointIndex,
+                curves.MovePoint(MovedPoint.CurveIndex, MovedPoint.PointIndex,
                     e.X - MouseLeftDown.Value.X,
                     e.Y - MouseLeftDown.Value.Y);
+                bezierPictureBox.Image = curves.bezierBitmap;
                 MouseLeftDown = e.Location;
             }
         }
@@ -142,8 +148,92 @@ namespace RGB_CMYK
             if (e.Button == MouseButtons.Left)
             {
                 MouseLeftDown = null;
-                MovedPointIndex = -1;
+                MovedPoint = (-1, -1);
             }
+        }
+
+        private void clearKButton_Click(object sender, EventArgs e)
+        {
+            curves.StraightCurve(3);
+            bezierPictureBox.Image = curves.bezierBitmap;
+
+        }
+
+        private void kCurveRadioButton_CheckedChanged(object sender, EventArgs e)
+        {
+            if (kCurveRadioButton.Checked)
+            {
+                curves.Curves[0].Active = false;
+                curves.Curves[1].Active = false;
+                curves.Curves[2].Active = false;
+                curves.Curves[3].Active = true;
+                curves.Redraw();
+                bezierPictureBox.Image = curves.bezierBitmap;
+
+            }
+        }
+
+        private void Cyan_CheckedChanged(object sender, EventArgs e)
+        {
+            if (Cyan.Checked)
+            {
+                curves.Curves[0].Active = true;
+                curves.Curves[1].Active = false;
+                curves.Curves[2].Active = false;
+                curves.Curves[3].Active = false;
+                curves.Redraw();
+                bezierPictureBox.Image = curves.bezierBitmap;
+
+            }
+        }
+
+        private void Magenta_CheckedChanged(object sender, EventArgs e)
+        {
+            if (Magenta.Checked)
+            {
+                curves.Curves[0].Active = false;
+                curves.Curves[1].Active = true;
+                curves.Curves[2].Active = false;
+                curves.Curves[3].Active = false;
+                curves.Redraw();
+                bezierPictureBox.Image = curves.bezierBitmap;
+
+            }
+        }
+
+        private void Yellow_CheckedChanged(object sender, EventArgs e)
+        {
+            if (Yellow.Checked)
+            {
+                curves.Curves[0].Active = false;
+                curves.Curves[1].Active = false;
+                curves.Curves[2].Active = true;
+                curves.Curves[3].Active = false;
+                curves.Redraw();
+                bezierPictureBox.Image = curves.bezierBitmap;
+
+            }
+        }
+
+        private void clearCButton_Click(object sender, EventArgs e)
+        {
+            curves.StraightCurve(0);
+            bezierPictureBox.Image = curves.bezierBitmap;
+
+        }
+
+        private void clearMButton_Click(object sender, EventArgs e)
+        {
+            curves.StraightCurve(1);
+            bezierPictureBox.Image = curves.bezierBitmap;
+
+        }
+
+        private void clearYButton_Click(object sender, EventArgs e)
+        {
+            curves.StraightCurve(2);
+            bezierPictureBox.Image = curves.bezierBitmap;
+
         }
     }
 }

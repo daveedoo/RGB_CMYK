@@ -6,50 +6,44 @@ namespace RGB_CMYK
     class BezierCurve
     {
         public int[] Values;
-        //private Point P0, P1, P2, P3;   
+        public bool Active;
         private Point[] Points = new Point[4];  // points used for calculations
         private Point[] drawPoints = new Point[4];  // points used for drawing
-        //private Point p0, p1, p2, p3;
+        private Color lineColor;
         private const int radius = 5;
-        //Bitmap bitmap;
 
-        // P1.X < P2.X
-        public BezierCurve(Point P0, Point P1, Point P2, Point P3)
+        // punkty powinny należeć do kwadratu [0; 255]x[0; 255]
+        public BezierCurve(Point P1, Point P2, Color lineColor, bool active = true)
         {
-            //if (bmp.Width != 512 || bmp.Height != 512)  // dla uproszczenia obliczeń przyjmuję tylko bitmapy 512x512
-            //    throw new ArgumentException();
+            if (P1.X < 0 || P1.X > 255 || P1.Y < 0 || P1.Y > 255 ||
+                P2.X < 0 || P2.X > 255 || P2.Y < 0 || P2.Y > 255 ||
+                P1.X > P2.X)    // krzywa może nie być funkcją
+                throw new ArgumentException();
 
-            Points[0] = P0;
+            Points[0] = new Point(0, 0);
             Points[1] = P1;
             Points[2] = P2;
-            Points[3] = P3;
+            Points[3] = new Point(255, 255);
             for (int i = 0; i < drawPoints.Length; i++)
-                drawPoints[i] = new Point(2 * Points[i].X, 512 - 2 * Points[i].Y);
+                drawPoints[i] = new Point(2 * Points[i].X, 510 - 2 * Points[i].Y);
 
-            //bitmap = bmp;
+            this.lineColor = lineColor;
+            Active = active;
 
             CalcValues();
         }
 
-        public Bitmap Draw()
+        public void Draw(ref Bitmap bmp)
         {
-            //if (bmp.Width != 512 || bmp.Height != 512)  // dla uproszczenia obliczeń przyjmuję tylko bitmapy 512x512
-            //    throw new ArgumentException();
+            Graphics g = Graphics.FromImage(bmp);
+            g.DrawBezier(new Pen(lineColor), drawPoints[0], drawPoints[1], drawPoints[2], drawPoints[3]);
 
-            // współrzędne punktów przeliczone dla dobrego rysowania na bitmapie
-            Bitmap newbmp = new Bitmap(512, 512);
-            //bmp.Dispose();
-
-            Graphics g = Graphics.FromImage(newbmp);
-            g.DrawBezier(Pens.Red, drawPoints[0], drawPoints[1], drawPoints[2], drawPoints[3]);
-
-            for (int i = 0; i < drawPoints.Length; i++)
-                g.DrawEllipse(Pens.Black, drawPoints[i].X - radius, drawPoints[i].Y - radius, 2*radius, 2*radius);
-
-            return newbmp;
+            if (Active)
+                for (int i = 0; i < drawPoints.Length; i++)
+                    g.DrawEllipse(Pens.Black, drawPoints[i].X - radius, drawPoints[i].Y - radius, 2*radius, 2*radius);
         }
 
-        private double distance(Point p1, Point p2) => Math.Sqrt((p2.X - p1.X)*(p2.X - p1.X) + (p2.Y - p1.Y)*(p2.Y - p1.Y));
+        private static double distance(Point p1, Point p2) => Math.Sqrt((p2.X - p1.X)*(p2.X - p1.X) + (p2.Y - p1.Y)*(p2.Y - p1.Y));
         public int IsCloseToPoint(Point m)
         {
             for (int i = 0; i < drawPoints.Length; i++)
@@ -59,19 +53,36 @@ namespace RGB_CMYK
             }
             return -1;
         }
-        public Bitmap MovePoint(int index, int offsetX, int offsetY)
+
+        public void MovePoint(int index, int offsetX, int offsetY)
         {
             if (index < 0 || index > Points.Length - 1)
                 throw new ArgumentException("Bad index");
 
-            drawPoints[index].Offset(offsetX, offsetY);
-            Points[index].Offset(offsetX/2, offsetY/2);
+            if (index == 1 || index == 2)
+            {
+                Point newPt = new Point(drawPoints[index].X + offsetX, drawPoints[index].Y + offsetY);
 
-            return Draw();
+                // poprawność w poziomie
+                if (newPt.X < drawPoints[0].X)
+                    newPt.X = drawPoints[0].X;
+                else if (newPt.X > drawPoints[3].X)
+                    newPt.X = drawPoints[3].X;
+                // poprawność w pionie
+                if (newPt.Y < 0)
+                    newPt.Y = 0;
+                else if (newPt.Y > 510)
+                    newPt.Y = 510;
+
+                drawPoints[index] = newPt;
+                Points[index] = new Point(newPt.X / 2, (510 - newPt.Y) / 2);
+
+                CalcValues(); 
+            }
         }
 
-        private static Func<double, double> crt = x => (x < 0 ? -Math.Pow(-x, 1f / 3f) : Math.Pow(x, 1f / 3f));  // cube root
-        // https://stackoverflow.com/questions/51879836/cubic-bezier-curves-get-y-for-given-x-special-case-where-x-of-control-points
+        private static Func<double, double> crt = x => (x < 0 ? -Math.Pow(-x, 1d / 3d) : Math.Pow(x, 1d / 3d));  // cube root
+        // metoda 'findRoots' wzięta z https://stackoverflow.com/questions/51879836/cubic-bezier-curves-get-y-for-given-x-special-case-where-x-of-control-points
         // Find the roots for a cubic polynomial with bernstein coefficients
         // {pa, pb, pc, pd}. The function will first convert those to the
         // standard polynomial coefficients, and then run through Cardano's
@@ -179,11 +190,12 @@ namespace RGB_CMYK
             Point P1 = Points[1];
             Point P2 = Points[2];
             Point P3 = Points[3];
+
             // współczyniki funkcji y(t) = B3*t^3 + B2*t^2 + B1*t + B0
-            int B0 = P0.Y;
-            int B1 = 3 * (P1.Y - P0.Y);
-            int B2 = 3 * (P2.Y - 2 * P1.Y + P0.Y);
-            int B3 = P3.Y - 3 * P2.Y + 3 * P1.Y - P0.Y;
+            float B0 = P0.Y;
+            float B1 = 3 * (P1.Y - P0.Y);
+            float B2 = 3 * (P2.Y - 2 * P1.Y + P0.Y);
+            float B3 = P3.Y - 3 * P2.Y + 3 * P1.Y - P0.Y;
 
             Values = new int[256];
 
